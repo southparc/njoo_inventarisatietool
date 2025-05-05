@@ -82,7 +82,6 @@
       margin-top: 30px;
     }
 
-    /* ✅ Mobiel fixes */
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -100,7 +99,6 @@
       }
     }
 
-    /* Popup */
     .popup {
       position: fixed;
       top: 50%;
@@ -164,48 +162,27 @@
     </div>
 
     <div class="container hidden persoonlijkeGegevens-container" id="persoonlijkeGegevens">
-      <!-- ✅ FormSubmit HTML form -->
-      <form 
-        action="https://formsubmit.co/c7c100c9ab8deb22a969739dc3c09d18"
-        method="POST"
-        onsubmit="toonPopup();"
-        class="column"
-      >
-        <!-- Verborgen configuratie -->
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_subject" value="Nieuw overwaarde formulier">
-        <input type="hidden" name="_next" value="https://neemjeoverwaardeop.nl">
-
-        <!-- Eerder ingevulde data -->
-        <input type="hidden" name="Huiswaarde" id="formHuiswaarde">
-        <input type="hidden" name="Hypotheek" id="formHypotheek">
-        <input type="hidden" name="Bank" id="formBank">
-        <input type="hidden" name="Inkomen" id="formInkomen">
-        <input type="hidden" name="Inkomen partner" id="formPartnerInkomen">
-
-        <!-- Persoonlijke gegevens -->
+      <form onsubmit="verstuurNaarN8N(event)" class="column">
         <label>Naam:</label>
-        <input type="text" name="Naam" required>
+        <input type="text" id="naam" required>
 
         <label>E-mail:</label>
-        <input type="email" name="E-mail" required>
+        <input type="email" id="email" required>
 
         <label>Leeftijd:</label>
-        <input type="number" name="Leeftijd" required>
+        <input type="number" id="leeftijd" required>
 
         <label>Telefoon:</label>
-        <input type="tel" name="Telefoon" required>
+        <input type="tel" id="telefoon" required>
 
         <label>Opmerkingen (optioneel):</label>
-        <textarea name="Opmerkingen"></textarea>
+        <textarea id="opmerkingen"></textarea>
 
         <button type="submit">Verstuur</button>
       </form>
     </div>
   </div>
 
-  <!-- ✅ Popup -->
   <div class="overlay" id="popupOverlay"></div>
   <div class="popup" id="popupBedankt">
     <h3>Bedankt voor je aanvraag!</h3>
@@ -251,13 +228,6 @@
       document.getElementById("overwaarde-resultaat").classList.remove("hidden");
 
       document.getElementById("persoonlijkeGegevens").classList.remove("hidden");
-
-      // Vul verborgen velden voor verzending
-      document.getElementById("formHuiswaarde").value = document.getElementById("huiswaarde").value;
-      document.getElementById("formHypotheek").value = document.getElementById("hypotheek").value;
-      document.getElementById("formBank").value = document.getElementById("bank").value;
-      document.getElementById("formInkomen").value = document.getElementById("inkomen").value;
-      document.getElementById("formPartnerInkomen").value = document.getElementById("inkomenPartner").value || "Geen";
     }
 
     function formatNumber(input) {
@@ -277,6 +247,44 @@
       setTimeout(() => {
         window.location.href = "https://neemjeoverwaardeop.nl";
       }, 3000);
+    }
+
+    async function verstuurNaarN8N(event) {
+      event.preventDefault();
+
+      const data = {
+        huiswaarde: document.getElementById("huiswaarde").value,
+        hypotheek: document.getElementById("hypotheek").value,
+        bank: document.getElementById("bank").value,
+        inkomen: document.getElementById("inkomen").value,
+        inkomenPartner: document.getElementById("inkomenPartner").value || "Geen",
+        naam: document.getElementById("naam").value,
+        email: document.getElementById("email").value,
+        leeftijd: document.getElementById("leeftijd").value,
+        telefoon: document.getElementById("telefoon").value,
+        opmerkingen: document.getElementById("opmerkingen").value
+      };
+
+      const webhookUrl = "https://je-n8n-webhook-url"; // <-- vervang dit
+
+      try {
+        const response = await fetch(webhookUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          toonPopup();
+        } else {
+          alert("Er ging iets mis. Probeer het later opnieuw.");
+        }
+      } catch (error) {
+        console.error("Fout bij versturen:", error);
+        alert("Er is een netwerkfout opgetreden.");
+      }
     }
   </script>
 
